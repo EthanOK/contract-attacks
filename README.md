@@ -18,4 +18,9 @@ npx hardhat run scripts/deploy.ts
 npm install && forge install
 ```
 
-## [attack event](./attack-event/attack.md)
+## review attack event
+
+| 攻击时间   |                         项目                          |  损失金额  |                            原因 |
+| :--------- | :---------------------------------------------------: | :--------: | ------------------------------: |
+| 2024.07.16 |  [LI.FI Protocol](./attack-event/LI_FI_Protocol.md)   | $2,276,295 | 底层 call 调用 + 参数校验不严格 |
+| 2024.07.23 | [Spectra Protocol](./attack-event/SpectraProtocol.md) |  $73, 325  | 底层 call 调用 + 参数校验不严格 |
