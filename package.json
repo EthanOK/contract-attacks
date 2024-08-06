@@ -1,16 +1,16 @@
 {
-  "name": "hardhat-ts",
+  "name": "contract-attacks",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "clean": "npx hardhat clean && forge clean",
     "compile": "npx hardhat compile && forge build",
-    "coverage": "npx hardhat coverage",
-    "storage-layout": "npx hardhat check",
     "test:hh": "npx hardhat test",
     "test:ff": "forge test -vvv",
     "test": "npx hardhat test && forge test -vvv",
+    "coverage": "npx hardhat coverage",
+    "storage-layout": "npx hardhat check",
     "node": "npx hardhat node"
   },
   "author": "",

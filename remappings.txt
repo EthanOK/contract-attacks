@@ -1,3 +1,4 @@
 forge-std/=contracts/lib/forge-std/src/
 @openzeppelin/contracts=node_modules/@openzeppelin/contracts
 @openzeppelin/contracts-upgradeable=node_modules/@openzeppelin/contracts-upgradeable
+solady/=contracts/lib/solady/src/

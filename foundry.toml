@@ -9,7 +9,7 @@ evm_version = 'shanghai'
 
 optimize = true
 runs = 200
-solc_version = '0.8.19'
+solc_version = '0.8.20'
 
 [rpc_endpoints]
 sepolia = "https://rpc.ankr.com/eth_sepolia"
