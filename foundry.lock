@@ -1,0 +1,8 @@
+{
+  "contracts/lib/forge-std": {
+    "rev": "07263d193d621c4b2b0ce8b4d54af58f6957d97d"
+  },
+  "contracts/lib/solady": {
+    "rev": "2907b5036b9b3489891e69b49adba24c793940d4"
+  }
+}

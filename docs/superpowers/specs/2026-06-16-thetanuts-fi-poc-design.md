@@ -56,9 +56,33 @@ contracts/test/ThetanutsFi/
 | `USDC` | `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` | 变现资产 |
 | `VAULT_BTCUSD` | `0x3BA337F3167eA35910E6979D5BC3b0AeE60E7d59` | BTC Put Vault |
 | `VAULT_ETHUSD` | `0xE1c93dE547cc85cbd568295f6cc322b1dbBCf8Ae` | ETH Put Vault |
-| `FLASH_LOAN_AMOUNT` | `153_054_600_569` | 借入 Index Token |
-| `FLASH_LOAN_PREMIUM` | `137_749_140` | 闪电贷手续费 |
-| `REPAY_TARGET` | `153_192_349_709` | AMOUNT + PREMIUM |
+| `TARGET_REMAINING_SUPPLY` | `3` | claim 后刻意保留的 `totalSupply`（链上验证值） |
+| `INDEX_TOTAL_SUPPLY_AT_FORK` | `153_054_600_572` | fork 区块 Index `totalSupply()`（参考值） |
+| `FLASH_LOAN_AMOUNT` | `153_054_600_569` | `totalSupply - 3`，借入并 claim 销毁的量 |
+| `FLASH_LOAN_PREMIUM` | `137_749_140` | 闪电贷手续费（链上参考值，回调内从 `premiums` 读取） |
+| `REPAY_TARGET` | `FLASH_LOAN_AMOUNT + premium` | 还贷目标，非写死常量 |
+
+### 借入量与 totalSupply 的关系
+
+攻击前 Index `totalSupply = 153,054,600,572`，闪电贷借入 `153,054,600,569`，二者差 **3**：
+
+```
+borrowAmount = totalSupply - TARGET_REMAINING_SUPPLY
+             = 572 - 3 = 569
+```
+
+`claim(borrowAmount)` 销毁借来的 Index 后，`totalSupply` 降至 **3**，进入 low-supply 畸形状态，使后续 `mint` 满足 `backing × amount < totalSupply` 时 `depositAmount = 0`。
+
+**实现策略（v1）：**
+
+```solidity
+uint256 supply = IIndexToken(INDEX_TOKEN).totalSupply();
+uint256 borrowAmount = supply - TARGET_REMAINING_SUPPLY; // 动态计算，fork 上应等于 569
+```
+
+测试 `setUp` 后可断言 `supply == 153_054_600_572` 且 `borrowAmount == 153_054_600_569`。
+
+> **最终决策（2026-06-16）：** 经 fork sweep（remaining 0–10），**固定 `TARGET_REMAINING_SUPPLY = 3`**。链上对齐、USDC 利润最高（105,471,499,078）。可行但次优：5/6（~51M）、7/8（~23M）；0/1/2/4/9/10 失败。
 
 Vault Token 地址（claim 拆包所得，实现时从 trace 确认后写入 Constants）：
 
@@ -137,18 +161,19 @@ interface IFlashLoanReceiver {
 PLAYER (prank)
   └─ new AttackThetanutsFi()
   └─ attack(PLAYER)
-       └─ flashLoan(INDEX_TOKEN, 153_054_600_569)
+       └─ flashLoan(INDEX_TOKEN, totalSupply - 3)  // = 153_054_600_569
             └─ executeOperation 回调
 ```
 
 ### 5.2 回调内步骤
 
-1. **claim(FLASH_LOAN_AMOUNT)** — 烧掉借来的 Index Token，拆出 5 种 Vault Token，`totalSupply` 进入低供应量畸形状态
-2. **_freeMintLoop(REPAY_TARGET)** — 算法驱动零成本 mint，凑够还贷数量
-3. **approve INDEX → LendingRouter** — 授权还贷
-4. **initWithdraw** — 对 BTCUSD、ETHUSD Vault Token 全额 `initWithdraw`
-5. **transfer** — USDC 及剩余 AVAX/BNB/MATIC Vault Token 转至 `receiver`（PLAYER）
-6. **return true**
+1. **读取 `borrowAmount = totalSupply - 3`** — fork 上应得 `153_054_600_569`
+2. **claim(borrowAmount)** — 烧掉借来的 Index Token，拆出 5 种 Vault Token，`totalSupply` 降至 3
+3. **_freeMintLoop(borrowAmount + premium)** — 算法驱动零成本 mint，凑够还贷数量
+4. **approve INDEX → LendingRouter** — 授权还贷
+5. **initWithdraw** — 对 BTCUSD、ETHUSD Vault Token 全额 `initWithdraw`
+6. **transfer** — USDC 及剩余 AVAX/BNB/MATIC Vault Token 转至 `receiver`（PLAYER）
+7. **return true**
 
 ### 5.3 数据流
 
@@ -288,3 +313,5 @@ forge test --match-contract ThetanutsFiChallenge -vvv
 | 架构 | 单合约 Attack | YAGNI，足够完成 PoC |
 | 调用者 | prank 攻击者 EOA | 与 LI.FI/Spectra 一致 |
 | Fork 区块 | 25323328 | 攻击 tx 前一块 |
+| claim 后剩余 supply | 3 | 链上验证值，v1 固定；后续可改为 5 等做实验 |
+| 借入量计算 | `totalSupply - 3` | 动态读取，fork 上 = 153_054_600_569 |
