@@ -61,6 +61,7 @@ utils/                辅助脚本（如读取交易/合约信息等）
 | 2024.07.16 | [LI.FI Protocol](./attack-event/LI_FI_Protocol.md) | Ethereum | $2,276,295 | `0xd82fe84e63b1aa52e1ce540582ee0895ba4a71ec5e7a632a3faa1aff3e763873` | `contracts/test/LiFiDiamond/LiFiDiamondChallenge.t.sol` | 底层 `call` 调用 + 参数校验不严格（可被构造 `transferFrom`） |
 | 2024.07.23 | [Spectra Protocol](./attack-event/SpectraProtocol.md) | Ethereum | $73,325 | `0x491cf8b2a5753fdbf3096b42e0a16bc109b957dc112d6537b1ed306e483d0744` | `contracts/test/Spectra/AttackSpectraAMProxy.sol` | 底层 `call` 调用 + 参数校验不严格（可被构造任意路由调用） |
 | 2026.06.15 | [Thetanuts Finance](./attack-event/ThetanutsFinance.md) | Ethereum | ~$2.1M | `0xbba9f138fe39503bfd1aa62932dbd6ab35d37d23d48e4b7bf2988a9d5dc39fec` | `contracts/test/ThetanutsFi/ThetanutsFiChallenge.t.sol` | low-supply 边界下整数除法舍入错误（零成本 `mint` + `claim`/`initWithdraw` 兑现） |
+| 2026.06.17 | [Little Boy Plus](./attack-event/LittleBoyPlus.md) | BSC | ~377k USDT | `0x55856d9fda4c5be5193561c7d775e823c3d6e499da44aab9da963daf61c50b0c` | `contracts/test/LittleBoyPlus/LittleBoyPlusChallenge.t.sol` | LBPHashrate 零金额 `transferFrom` 触发 `_harvest` + `mintReward` 致 Pair balance≠reserves |
 
 ## 如何新增一个事件/PoC
 

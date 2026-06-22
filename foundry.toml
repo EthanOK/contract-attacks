@@ -5,7 +5,7 @@ libs = ['node_modules', 'contracts/lib']
 test = 'contracts/test'
 script = 'contracts/script'
 # Default: paris 
-evm_version = 'shanghai'
+evm_version = 'cancun'
 
 optimizer_runs = 200
 
@@ -13,3 +13,4 @@ solc_version = '0.8.20'
 
 [rpc_endpoints]
 sepolia = "https://rpc.ankr.com/eth_sepolia"
+bsc = "${BSC_RPC_URL}"
